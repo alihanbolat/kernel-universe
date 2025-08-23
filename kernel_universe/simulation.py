@@ -34,9 +34,20 @@ class Core:
         self.bloomed = False
         
         # Update temperature exposure counter
-        if config.T_MIN <= temperature <= config.T_MAX:
+        # Only count exposures on EMIT ticks when both temperature and
+        # catalyst thresholds are satisfied. This mirrors the intended
+        # bloom pre‑conditions and keeps the exposure counter from
+        # increasing when any requirement is missing.
+        if (
+            emit_mode and
+            catalyst >= config.C_THRESH and
+            config.T_MIN <= temperature <= config.T_MAX
+        ):
             self.temp_exposure_count += 1
         else:
+            # Reset when leaving the valid range or when other
+            # requirements are not met so that consecutive valid
+            # exposures are counted correctly.
             self.temp_exposure_count = 0
         
         # Check bloom conditions
